@@ -1,0 +1,16 @@
+[project]
+name = "my-ai-job-search"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "mcp[cli]>=2.1.1",
+]
+
+[project.scripts]
+my-ai-job-search = "my_ai_job_search:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"

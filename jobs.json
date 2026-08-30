@@ -1,0 +1,140 @@
+[
+  {
+    "id": 1,
+    "title": "Senior Java Developer",
+    "company": "TechNova Solutions",
+    "location": "Chennai",
+    "work_mode": "Hybrid",
+    "experience": "5-8 years",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "REST API",
+      "Microservices",
+      "AWS",
+      "Docker"
+    ],
+    "salary": "18-25 LPA",
+    "description": "Looking for a Senior Java Developer with strong experience in Java, Spring Boot, REST APIs, microservices and AWS."
+  },
+  {
+    "id": 2,
+    "title": "Java Backend Engineer",
+    "company": "CloudMatrix",
+    "location": "Bangalore",
+    "work_mode": "Remote",
+    "experience": "3-6 years",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Kafka",
+      "Docker",
+      "Kubernetes"
+    ],
+    "salary": "14-22 LPA",
+    "description": "Backend engineer responsible for building scalable Java microservices using Spring Boot, Kafka and Kubernetes."
+  },
+  {
+    "id": 3,
+    "title": "Python Developer",
+    "company": "DataSphere",
+    "location": "Chennai",
+    "work_mode": "On-site",
+    "experience": "2-5 years",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "salary": "10-16 LPA",
+    "description": "Python developer required for building REST APIs and backend services using FastAPI."
+  },
+  {
+    "id": 4,
+    "title": "Technical Lead - Java",
+    "company": "EnterpriseSoft",
+    "location": "Chennai",
+    "work_mode": "Hybrid",
+    "experience": "7-10 years",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Microservices",
+      "AWS",
+      "Kubernetes",
+      "Leadership"
+    ],
+    "salary": "25-35 LPA",
+    "description": "Technical Lead responsible for designing Java microservices and leading a backend engineering team."
+  },
+  {
+    "id": 5,
+    "title": "Full Stack Developer",
+    "company": "WebWorks India",
+    "location": "Hyderabad",
+    "work_mode": "Hybrid",
+    "experience": "4-7 years",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "React",
+      "JavaScript",
+      "AWS"
+    ],
+    "salary": "15-23 LPA",
+    "description": "Full stack developer with experience in Java Spring Boot, React and AWS."
+  },
+  {
+    "id": 6,
+    "title": "DevOps Engineer",
+    "company": "InfraCloud",
+    "location": "Remote",
+    "work_mode": "Remote",
+    "experience": "4-8 years",
+    "skills": [
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "Jenkins",
+      "Terraform"
+    ],
+    "salary": "16-25 LPA",
+    "description": "DevOps engineer responsible for cloud infrastructure, CI/CD and Kubernetes deployments."
+  },
+  {
+    "id": 7,
+    "title": "Spring Boot Developer",
+    "company": "FinTech Labs",
+    "location": "Chennai",
+    "work_mode": "Remote",
+    "experience": "4-6 years",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "REST API",
+      "SQL",
+      "Microservices"
+    ],
+    "salary": "14-20 LPA",
+    "description": "Spring Boot developer needed for financial services applications and REST APIs."
+  },
+  {
+    "id": 8,
+    "title": "AI Engineer",
+    "company": "GenAI Works",
+    "location": "Bangalore",
+    "work_mode": "Hybrid",
+    "experience": "3-7 years",
+    "skills": [
+      "Python",
+      "LLM",
+      "RAG",
+      "LangChain",
+      "MCP",
+      "FastAPI"
+    ],
+    "salary": "18-30 LPA",
+    "description": "AI engineer working on LLM applications, RAG pipelines, MCP servers and AI agents."
+  }
+]
