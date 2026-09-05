@@ -4,6 +4,17 @@ This project provides an MCP server that lets Claude Desktop search the local jo
 
 ## Connect to Claude Desktop on Windows
 
+### Check Installations
+
+```powershell
+where.exe python
+```
+```powershell
+where.exe uv
+```
+
+It gives the path about where it is installed in your machine.
+
 ### 1. Confirm the project environment
 
 From the project directory, verify that the virtual environment exists:
@@ -19,7 +30,7 @@ The command should return `True`.
 Open or create this file:
 
 ```text
-%APPDATA%\Claude\claude_desktop_config.json
+%APPDATA%\Claude\claude_desktop_config.json or get the path by opening claude desktop
 ```
 
 If the file already contains other MCP servers, add the `ai-job-search` entry inside the existing `mcpServers` object.
