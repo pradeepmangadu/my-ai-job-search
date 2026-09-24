@@ -6,7 +6,7 @@ from typing import Any
 import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import Json, RealDictCursor
-from mcp.server import MCPServer
+from mcp.server.mcpserver import MCPServer
 
 load_dotenv(Path(__file__).with_name(".env"))
 
