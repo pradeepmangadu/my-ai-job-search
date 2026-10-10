@@ -7,6 +7,8 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import Json, RealDictCursor
 from mcp.server.mcpserver import MCPServer
+from database import get_connection, initialize_database, import_jobs_from_json, normalize_job
+from utils.job_analyser import analyze_saved_job
 
 load_dotenv(Path(__file__).with_name(".env"))
 
@@ -16,151 +18,6 @@ load_dotenv(Path(__file__).with_name(".env"))
 # ============================================================
 
 mcp = MCPServer("AI Job Search")
-
-
-# ============================================================
-# FILE PATHS
-# ============================================================
-
-BASE_DIR = Path(__file__).parent
-JOBS_JSON_FILE = BASE_DIR / "jobs.json"
-
-
-# ============================================================
-# POSTGRES CONFIG
-# ============================================================
-
-
-def get_connection():
-    """
-    Create a PostgreSQL connection using environment variables.
-    """
-    conn_url = os.getenv("DATABASE_URL")
-    if not conn_url:
-        raise RuntimeError(
-            "Missing DATABASE_URL"
-            "Set a Supabase PostgreSQL connection string."
-        )
-
-    return psycopg2.connect(conn_url)
-
-
-# ============================================================
-# DATABASE INITIALIZATION
-# ============================================================
-
-def initialize_database():
-    """
-    Create the jobs table if it does not already exist.
-    """
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS jobs (
-            id INTEGER PRIMARY KEY,
-            title TEXT NOT NULL,
-            company TEXT NOT NULL,
-            location TEXT,
-            work_mode TEXT,
-            experience TEXT,
-            skills JSONB DEFAULT '[]'::jsonb,
-            salary TEXT,
-            description TEXT,
-            url TEXT,
-            status TEXT DEFAULT 'NEW',
-            notes TEXT DEFAULT '',
-            created_at TIMESTAMPTZ DEFAULT NOW(),
-            updated_at TIMESTAMPTZ DEFAULT NOW()
-        )
-    """)
-
-    connection.commit()
-    connection.close()
-
-
-# ============================================================
-# NORMALIZATION HELPERS
-# ============================================================
-
-def normalize_job(row: dict[str, Any]) -> dict[str, Any]:
-    """Convert stored values back into the original app format."""
-    job = dict(row)
-
-    if isinstance(job.get("skills"), str):
-        try:
-            job["skills"] = json.loads(job["skills"])
-        except (TypeError, json.JSONDecodeError):
-            job["skills"] = []
-    elif job.get("skills") is None:
-        job["skills"] = []
-
-    return job
-
-
-# ============================================================
-# IMPORT JOBS FROM JSON
-# ============================================================
-
-def import_jobs_from_json():
-    """
-    Import jobs from jobs.json into Postgres.
-    This only happens when the database is empty.
-    """
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute("SELECT COUNT(*) FROM jobs")
-    job_count = cursor.fetchone()[0]
-
-    if job_count > 0:
-        connection.close()
-        return
-
-    if not JOBS_JSON_FILE.exists():
-        connection.close()
-        return
-
-    with open(JOBS_JSON_FILE, "r", encoding="utf-8") as file:
-        jobs = json.load(file)
-
-    for job in jobs:
-        cursor.execute("""
-            INSERT INTO jobs (
-                id,
-                title,
-                company,
-                location,
-                work_mode,
-                experience,
-                skills,
-                salary,
-                description,
-                url,
-                status,
-                notes,
-                created_at,
-                updated_at
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
-        """, (
-            job["id"],
-            job["title"],
-            job["company"],
-            job.get("location", ""),
-            job.get("work_mode", ""),
-            job.get("experience", ""),
-            Json(job.get("skills", [])),
-            job.get("salary", ""),
-            job.get("description", ""),
-            job.get("url", ""),
-            "NEW",
-            "",
-        ))
-
-    connection.commit()
-    connection.close()
-
 
 # ============================================================
 # TOOL 1: SEARCH JOBS
@@ -219,16 +76,8 @@ def get_job_details(job_id: int) -> dict:
     """
     Get complete information about a job using its ID.
     """
-    connection = get_connection()
-    cursor = connection.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT * FROM jobs WHERE id = %s", (job_id,))
-    row = cursor.fetchone()
-    connection.close()
 
-    if row is None:
-        return {"error": f"Job with ID {job_id} was not found."}
-
-    return normalize_job(dict(row))
+    return get_job_details(job_id)
 
 
 # ============================================================
@@ -388,6 +237,51 @@ def get_application_stats() -> dict:
         "total_jobs": sum(stats.values()),
         "status_breakdown": stats,
     }
+
+
+# ============================================================
+# TOOL: ANALYSE JOB WITH SKILLS
+# ============================================================
+
+
+@mcp.tool()
+def analyze_job_with_ai(
+    job_id: int,
+    candidate_skills: list[str]
+) -> dict:
+    """
+    Analyze a saved job using AI.
+
+    Fetches the job from PostgreSQL,
+    compares the job requirements against
+    candidate skills using OpenAI,
+    saves the analysis in PostgreSQL,
+    and returns the result.
+    """
+
+    return analyze_saved_job(
+        job_id=job_id,
+        candidate_skills=candidate_skills
+    )
+
+
+# ============================================================
+# TOOL: GET ALL JOBS
+# ============================================================
+
+@mcp.tool()
+def get_all_jobs() -> list:
+    """
+    Get all jobs stored in the database.
+    """
+    connection = get_connection()
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM jobs ORDER BY id")
+    rows = cursor.fetchall()
+    connection.close()
+
+    return [normalize_job(dict(row)) for row in rows]
+
 
 
 # ============================================================
