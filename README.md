@@ -39,22 +39,7 @@ If the file already contains other MCP servers, add the `ai-job-search` entry in
 
 Use the following JSON:
 
-```text
-If you are using uv
-```
 
-```json
-{
-	"mcpServers": {
-		"ai-job-search": {
-			"command": "D:\\VsCode\\my-ai-job-search\\.venv\\Scripts\\python.exe",
-			"args": [
-				"D:\\VsCode\\my-ai-job-search\\main.py"
-			]
-		}
-	}
-}
-```
 
 ```text
 If you are using python
@@ -95,7 +80,7 @@ Show the statistics for available jobs.
 Get the details for job ID 1.
 ```
 
-The available MCP tools are `search_jobs`, `get_job_details`, and `get_job_stats`. The server also provides the `config://app-version` resource and the `job_recommendation_prompt` prompt.
+The available MCP tools are `search_jobs`, `get_all_jobs`, `get_job_details`, and `get_job_stats`. The server also provides the `config://app-version` resource and the `job_recommendation_prompt` prompt.
 
 ## Troubleshooting
 
