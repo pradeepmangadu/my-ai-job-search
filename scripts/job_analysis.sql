@@ -25,3 +25,13 @@ CREATE TABLE job_analysis (
         REFERENCES jobs(id)
         ON DELETE CASCADE
 );
+
+
+ALTER TABLE job_analysis
+ADD COLUMN IF NOT EXISTS input_tokens INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS output_tokens INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS estimated_cost_usd NUMERIC(12, 8) DEFAULT 0;
+
+
+CREATE INDEX IF NOT EXISTS idx_job_analysis_score
+ON job_analysis(match_score DESC);

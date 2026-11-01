@@ -28,3 +28,14 @@ class JobAnalysis(BaseModel):
     recommendation: Recommendation
 
     summary: str
+
+
+class AnalysisUsage(BaseModel):
+    input_tokens: int = 0
+    output_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+
+class AnalysisResult(BaseModel):
+    analysis: JobAnalysis
+    usage: AnalysisUsage

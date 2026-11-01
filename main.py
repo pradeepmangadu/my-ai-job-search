@@ -7,7 +7,8 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import Json, RealDictCursor
 from mcp.server.mcpserver import MCPServer
-from database import get_connection, initialize_database, import_jobs_from_json, normalize_job
+from database import get_connection, get_top_matching_jobs, initialize_database, import_jobs_from_json, normalize_job
+from utils.batch_analyzer import batch_analyze_jobs
 from utils.job_analyser import analyze_saved_job
 
 load_dotenv(Path(__file__).with_name(".env"))
@@ -283,6 +284,48 @@ def get_all_jobs() -> list:
     return [normalize_job(dict(row)) for row in rows]
 
 
+@mcp.tool()
+def get_previously_analyzed_jobs(
+    min_score: int = 60,
+    limit: int = 10
+) -> list[dict[str, Any]]:
+    """
+    Get the latest saved analysis for each job scoring at least min_score.
+
+    Returns jobs ordered by match score, highest first. Does not call the AI API.
+    """
+    return get_top_matching_jobs(
+        min_score=min_score,
+        limit=limit
+    )
+
+
+
+@mcp.tool()
+def find_best_matching_jobs(
+    candidate_skills: list[str],
+    max_jobs: int = 5,
+    min_score: int = 60,
+    top_n: int = 3
+) -> dict:
+    """
+    Analyze multiple stored jobs using the OpenAI API.
+
+    Compares jobs against candidate skills,
+    saves AI analysis to Supabase PostgreSQL,
+    ranks jobs by skill match score,
+    and returns the best matching opportunities.
+
+    This tool makes paid API calls.
+    Default batch size is five jobs.
+    """
+
+    return batch_analyze_jobs(
+        candidate_skills=candidate_skills,
+        max_jobs=max_jobs,
+        min_score=min_score,
+        top_n=top_n
+    )
 
 # ============================================================
 # START SERVER
