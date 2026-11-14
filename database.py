@@ -318,6 +318,54 @@ def save_batch_job_analysis(job_id, result):
             return saved["id"]
 
 
+def candidate_save_batch_job_analysis(job_id, result, candidate_id: int | None = None):
+
+    analysis = result.analysis
+    usage = result.usage
+
+    query = """
+        INSERT INTO job_analysis (
+            job_id,
+            candidate_id,
+            match_score,
+            matched_skills,
+            missing_skills,
+            strengths,
+            interview_topics,
+            recommendation,
+            summary,
+            input_tokens,
+            output_tokens,
+            estimated_cost_usd
+        )
+        VALUES (
+            %s, %s, %s, %s, %s, %s, %s,
+            %s, %s, %s, %s, %s
+        )
+        RETURNING id
+    """
+
+    values = (
+        job_id,
+        candidate_id,
+        analysis.match_score,
+        Json(analysis.matched_skills),
+        Json(analysis.missing_skills),
+        Json(analysis.strengths),
+        Json(analysis.interview_topics),
+        analysis.recommendation.value,
+        analysis.summary,
+        usage.input_tokens,
+        usage.output_tokens,
+        usage.estimated_cost_usd
+    )
+
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, values)
+            saved = cursor.fetchone()
+            return saved["id"]
+
 
 def get_top_matching_jobs(
     min_score: int = 60,
@@ -366,3 +414,49 @@ def get_top_matching_jobs(
                 (min_score, limit)
             )
             return [dict(row) for row in cursor.fetchall()]
+
+
+def get_candidate_top_jobs(
+    candidate_id: int,
+    min_score: int = 60,
+    limit: int = 5
+):
+
+    if not 0 <= min_score <= 100:
+        raise ValueError("Invalid minimum score.")
+
+    if not 1 <= limit <= 20:
+        raise ValueError("Limit must be 1 to 20.")
+
+    query = """
+        SELECT
+            j.id AS job_id,
+            j.title,
+            j.company,
+            a.id AS analysis_id,
+            a.match_score,
+            a.recommendation,
+            a.matched_skills,
+            a.missing_skills,
+            a.summary
+        FROM jobs j
+        JOIN LATERAL (
+            SELECT *
+            FROM job_analysis
+            WHERE job_id = j.id
+              AND candidate_id = %s
+            ORDER BY created_at DESC, id DESC
+            LIMIT 1
+        ) a ON TRUE
+        WHERE a.match_score >= %s
+        ORDER BY a.match_score DESC, j.id ASC
+        LIMIT %s
+    """
+
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                query,
+                (candidate_id, min_score, limit)
+            )
+            return cursor.fetchall()

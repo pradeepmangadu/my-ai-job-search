@@ -39,3 +39,26 @@ class AnalysisUsage(BaseModel):
 class AnalysisResult(BaseModel):
     analysis: JobAnalysis
     usage: AnalysisUsage
+
+
+
+class CandidateProfile(BaseModel):
+    id: int
+    name: str
+    skills: list[str]
+    experience_years: float = 0
+    preferred_role: str | None = None
+    preferred_location: str | None = None
+
+
+class InterviewQuestion(BaseModel):
+    question: str
+    topic: str
+    difficulty: str
+    preparation_hint: str
+
+
+class InterviewPreparation(BaseModel):
+    job_title: str
+    preparation_topics: list[str]
+    questions: list[InterviewQuestion]

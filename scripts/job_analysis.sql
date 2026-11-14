@@ -35,3 +35,50 @@ ADD COLUMN IF NOT EXISTS estimated_cost_usd NUMERIC(12, 8) DEFAULT 0;
 
 CREATE INDEX IF NOT EXISTS idx_job_analysis_score
 ON job_analysis(match_score DESC);
+
+
+--------------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS candidate_profiles (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    skills JSONB NOT NULL DEFAULT '[]'::jsonb,
+    experience_years NUMERIC(4,1) DEFAULT 0,
+    preferred_role VARCHAR(150),
+    preferred_location VARCHAR(150),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+
+
+ALTER TABLE job_analysis
+ADD COLUMN IF NOT EXISTS candidate_id BIGINT
+REFERENCES candidate_profiles(id)
+ON DELETE SET NULL;
+
+CREATE INDEX IF NOT EXISTS idx_analysis_candidate_job
+ON job_analysis(candidate_id, job_id, id DESC);
+
+
+CREATE TABLE IF NOT EXISTS job_applications (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    candidate_id BIGINT NOT NULL
+        REFERENCES candidate_profiles(id) ON DELETE CASCADE,
+
+    job_id BIGINT NOT NULL
+        REFERENCES jobs(id) ON DELETE CASCADE,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'Saved'
+        CHECK (status IN (
+            'Saved', 'Applied', 'Interviewing',
+            'Rejected', 'Offered'
+        )),
+
+    notes TEXT,
+    applied_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(candidate_id, job_id)
+);
